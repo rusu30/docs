@@ -1,304 +1,272 @@
----
-title: Working with the Docker registry
-intro: '{% ifversion fpt or ghec %}The Docker registry has now been replaced by the {% data variables.product.prodname_container_registry %}.{% else %}You can push and pull your Docker images using the {% data variables.product.prodname_registry %} Docker registry.{% endif %}'
-product: '{% data reusables.gated-features.packages %}'
-redirect_from:
-  - /articles/configuring-docker-for-use-with-github-package-registry
-  - /github/managing-packages-with-github-package-registry/configuring-docker-for-use-with-github-package-registry
-  - /github/managing-packages-with-github-packages/configuring-docker-for-use-with-github-packages
-  - /packages/using-github-packages-with-your-projects-ecosystem/configuring-docker-for-use-with-github-packages
-  - /packages/guides/container-guides-for-github-packages/configuring-docker-for-use-with-github-packages
-  - /packages/guides/configuring-docker-for-use-with-github-packages
-versions:
-  fpt: '*'
-  ghes: '*'
-  ghae: '*'
-  ghec: '*'
-shortTitle: Docker registry
----
+the process of creating a GitHub repository and setting up the template described above step by step.
 
-<!-- Main versioning block. Short page for dotcom -->
-{% ifversion fpt or ghec %}
+Step 1: Create a New GitHub Repository
+Log in to GitHub:
+Ensure that you are logged in to your GitHub account.
 
-{% data variables.product.prodname_dotcom %}'s Docker registry (which used the namespace `docker.pkg.github.com`) has been replaced by the {% data variables.product.prodname_container_registry %} (which uses the namespace `https://ghcr.io`). The {% data variables.product.prodname_container_registry %} offers benefits such as granular permissions and storage optimizations for Docker images.
+Create a New Repository:
 
-Docker images previously stored in the Docker registry are being automatically migrated into the {% data variables.product.prodname_container_registry %}. For more information, see "[AUTOTITLE](/packages/working-with-a-github-packages-registry/migrating-to-the-container-registry-from-the-docker-registry)" and "[AUTOTITLE](/packages/working-with-a-github-packages-registry/working-with-the-container-registry)."
+Click on the "+" icon in the top right corner of the GitHub page.
+Select "New repository."
+Fill in Repository Details:
 
-{% else %}
-<!-- The remainder of this article is displayed for releases that don't support the Container registry -->
+Give your repository a name (e.g., dev-environment-template).
+Add a description if you'd like.
+Choose either Public or Private based on your preference.
+Initialize this repository with a README: Uncheck this option (since we will be adding our own README).
+Create Repository:
 
-{% data reusables.package_registry.packages-ghes-release-stage %}
-{% data reusables.package_registry.packages-ghae-release-stage %}
+Click on the "Create repository" button.
+Step 2: Set Up Repository Structure
+Clone the Repository:
+Open a terminal on your local machine, and navigate to the directory where you want to clone your repository. Then run:
 
-{% data reusables.package_registry.admins-can-configure-package-types %}
 
-## About Docker support
+git clone https://github.com/your-username/dev-environment-template.git
+cd dev-environment-template
+Create Directory Structure:
+Inside your local repository, create the necessary directories and files:
 
-When installing or publishing a Docker image, the Docker registry does not currently support foreign layers, such as Windows images.
 
-## Authenticating to {% data variables.product.prodname_registry %}
+mkdir -p .github/workflows scripts docs
+touch .gitignore scripts/setup.sh docs/README.md
+Step 3: Add Content to Files
+GitHub Actions Workflow (main.yml):
+Open .github/workflows/main.yml in a text editor and add the GitHub Actions workflow configuration:
 
-{% data reusables.package_registry.authenticate-packages %}
+name: CI/CD
 
-{% data reusables.package_registry.authenticate-packages-github-token %}
+on:
+  push:
+    branches:
+      - main
 
-### Authenticating with a {% data variables.product.pat_generic %}
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-{% data reusables.package_registry.required-scopes %}
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
 
-You can authenticate to {% data variables.product.prodname_registry %} with Docker using the `docker` login command.
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 14
 
-To keep your credentials secure, we recommend you save your {% data variables.product.pat_generic %} in a local file on your computer and use Docker's `--password-stdin` flag, which reads your token from a local file.
+    - name: Install Dependencies
+      run: npm install
 
-{% ifversion fpt or ghec %}
-{% raw %}
+    - name: Run Tests
+      run: npm test
+Setup Script (setup.sh):
+Open scripts/setup.sh in a text editor and add the setup script:
 
-```shell
-cat ~/TOKEN.txt | docker login https://docker.pkg.github.com -u USERNAME --password-stdin
-```
 
-{% endraw %}
-{% endif %}
+#!/bin/bash
 
-{% ifversion ghes or ghae %}
-{% ifversion ghes %}
-If your instance has subdomain isolation enabled:
-{% endif %}
-{% raw %}
+echo "Setting up the development environment..."
 
-```shell
-cat ~/TOKEN.txt | docker login docker.HOSTNAME -u USERNAME --password-stdin
-```
+# Add commands to install dependencies, set up databases, etc.
 
-{% endraw %}
-{% ifversion ghes %}
-If your instance has subdomain isolation disabled:
+echo "Development environment setup complete."
+Documentation (docs/README.md):
+Open docs/README.md in a text editor and add documentation:
 
-{% raw %}
+# Development Environment
 
-```shell
-cat ~/TOKEN.txt | docker login HOSTNAME -u USERNAME --password-stdin
-```
+## Setup
 
-{% endraw %}
-{% endif %}
+To set up the development environment, run the following command:
 
-{% endif %}
+```bash
+./scripts/setup.sh
+Running Tests
+Use the following command to run tests:
 
-To use this example login command, replace `USERNAME` with your {% data variables.product.product_name %} username{% ifversion ghes or ghae %}, `HOSTNAME` with the URL for {% data variables.location.product_location %},{% endif %} and `~/TOKEN.txt` with the file path to your {% data variables.product.pat_generic %} for {% data variables.product.product_name %}.
+npm test
+Additional Information
+Add any additional information or guidelines for developers here.
 
-For more information, see "[Docker login](https://docs.docker.com/engine/reference/commandline/login/#provide-a-password-using-stdin)."
+Gitignore File (.gitignore):
+Open .gitignore in a text editor and add:
 
-## Publishing an image
 
-{% data reusables.package_registry.docker_registry_deprecation_status %}
+node_modules/
+.DS_Store
+Step 4: Push Changes to GitHub
+Add, Commit, and Push Changes:
+Run the following commands to commit your changes and push them to GitHub:
 
-{% note %}
+git add .
+git commit -m "Add GitHub Actions workflow, setup script, and documentation"
+git push origin main
+Step 5: Check GitHub Repository
+Visit GitHub Repository:
+Visit your GitHub repository in a web browser.
 
-**Note:** Image names must only use lowercase letters.
+Verify Contents:
+Verify that the directory structure and files you created are present.
 
-{% endnote %}
+Step 6: Usage
+Developers Set Up Environment: Developers can clone the repository and use the setup script and documentation to set up the development environment.
+Congratulations! You've created a GitHub repository with a basic development environment template. Developers can use this template to set up their development environment for your project.
 
-{% data variables.product.prodname_registry %} supports multiple top-level Docker images per repository. A repository can have any number of image tags. You may experience degraded service publishing or installing Docker images larger than 10GB, layers are capped at 5GB each. For more information, see "[Docker tag](https://docs.docker.com/engine/reference/commandline/tag/)" in the Docker documentation.
+give me code for pipeline in github
 
-{% data reusables.package_registry.viewing-packages %}
+Certainly! To create a basic CI/CD (Continuous Integration/Continuous Deployment) pipeline using GitHub Actions, you can follow the steps below. This example assumes a Node.js project with a simple build and test process.
 
-1. Determine the image name and ID for your docker image using `docker images`.
+Step 1: Create GitHub Actions Workflow
+Inside your project, create a directory named .github/workflows.
+Inside this directory, create a file named ci-cd.yml.
+Add the following content to ci-cd.yml:
 
-   ```shell
-   $ docker images
-   > <&nbsp>
-   > REPOSITORY        TAG        IMAGE ID       CREATED      SIZE
-   > IMAGE_NAME        VERSION    IMAGE_ID       4 weeks ago  1.11MB
-   ```
 
-1. Using the Docker image ID, tag the docker image, replacing OWNER with the name of the personal account or organization that owns the repository, REPOSITORY with the name of the repository containing your project, IMAGE_NAME with name of the package or image,{% ifversion ghes or ghae %} HOSTNAME with the hostname of {% data variables.location.product_location %},{% endif %} and VERSION with package version at build time.
-   {% ifversion fpt or ghec %}
+name: CI/CD
 
-   ```shell
-   docker tag IMAGE_ID docker.pkg.github.com/OWNER/REPOSITORY/IMAGE_NAME:VERSION
-   ```
+on:
+  push:
+    branches:
+      - main
 
-   {% else %}
-   {% ifversion ghes %}
-   If your instance has subdomain isolation enabled:
-   {% endif %}
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-   ```shell
-   docker tag IMAGE_ID docker.HOSTNAME/OWNER/REPOSITORY/IMAGE_NAME:VERSION
-   ```
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
 
-   {% ifversion ghes %}
-   If your instance has subdomain isolation disabled:
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 14
 
-   ```shell
-   docker tag IMAGE_ID HOSTNAME/OWNER/REPOSITORY/IMAGE_NAME:VERSION
-   ```
+    - name: Install Dependencies
+      run: npm install
 
-   {% endif %}
-   {% endif %}
-1. If you haven't already built a docker image for the package, build the image, replacing OWNER with the name of the personal account or organization that owns the repository, REPOSITORY with the name of the repository containing your project, IMAGE_NAME with name of the package or image, VERSION with package version at build time,{% ifversion ghes or ghae %} HOSTNAME with the hostname of {% data variables.location.product_location %},{% endif %} and PATH to the image if it isn't in the current working directory.
-   {% ifversion fpt or ghec %}
+    - name: Run Tests
+      run: npm test
 
-   ```shell
-   docker build -t docker.pkg.github.com/OWNER/REPOSITORY/IMAGE_NAME:VERSION PATH
-   ```
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Deploy to Production
+      # Add deployment steps here, e.g., deploying to a server or a cloud platform
+This example includes two jobs: build and deploy. The build job checks out the repository, sets up Node.js, installs dependencies, and runs tests. The deploy job, which depends on the build job, is a placeholder for deployment actions.
 
-   {% else %}
-   {% ifversion ghes %}
-   If your instance has subdomain isolation enabled:
-   {% endif %}
+Step 2: Push Changes to GitHub
+Commit the new .github/workflows/ci-cd.yml file and push it to your GitHub repository.
 
-   ```shell
-   docker build -t docker.HOSTNAME/OWNER/REPOSITORY/IMAGE_NAME:VERSION PATH
-   ```
+git add .github/workflows/ci-cd.yml
+git commit -m "Add CI/CD pipeline"
+git push origin main
+Step 3: Check GitHub Actions
+Visit your GitHub repository on the GitHub website.
+Navigate to the "Actions" tab.
+You should see your CI/CD workflow running or queued. GitHub Actions will execute the specified steps in the workflow file for every push to the main branch.
 
-   {% ifversion ghes %}
-   If your instance has subdomain isolation disabled:
+Step 4: Add Deployment Steps (Optional)
+If you want to deploy your application as part of the CI/CD pipeline, you can extend the deploy job in the workflow. This might involve deploying to a server, a cloud platform (e.g., Heroku, AWS, etc.), or another deployment target.
 
-   ```shell
-   docker build -t HOSTNAME/OWNER/REPOSITORY/IMAGE_NAME:VERSION PATH
-   ```
+Replace the Deploy to Production step in the deploy job with the actual deployment steps relevant to your project.
 
-   {% endif %}
-   {% endif %}
-1. Publish the image to {% data variables.product.prodname_registry %}.
-   {% ifversion fpt or ghec %}
+Remember to handle deployment credentials and secrets securely using GitHub Secrets.
 
-   ```shell
-   docker push docker.pkg.github.com/OWNER/REPOSITORY/IMAGE_NAME:VERSION
-   ```
+deploy:
+  runs-on: ubuntu-latest
+  needs: build
+  steps:
+  - name: Deploy to Production
+    run: |
+      # Add deployment steps here
+      # Example: ssh into a server and pull the latest changes
+      ssh user@your-server 'cd /path/to/your/app && git pull'
+    env:
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+This example assumes using an SSH key for deployment. You would need to set up an SSH key and add it as a secret in your GitHub repository.
 
-   {% else %}
-   {% ifversion ghes %}
-   If your instance has subdomain isolation enabled:
-   {% endif %}
+This is a basic example, and the actual deployment steps will depend on your project's architecture and deployment target. Adjust the workflow to suit your specific needs.
 
-   ```shell
-   docker push docker.HOSTNAME/OWNER/REPOSITORY/IMAGE_NAME:VERSION
-   ```
+how to work on dockerhub and sample work on dockerhub
 
-   {% ifversion ghes %}
-   If your instance has subdomain isolation disabled:
+Docker Hub is a cloud-based registry service that allows you to store and share Docker images. Docker images are the blueprints for containers, and Docker Hub provides a convenient way to publish, share, and access Docker images. Here's a basic guide on how to work with Docker Hub:
 
-   ```shell
-   docker push HOSTNAME/OWNER/REPOSITORY/IMAGE_NAME:VERSION
-   ```
+Step 1: Create a Docker Hub Account
+If you don't have a Docker Hub account, you can sign up at Docker Hub.
 
-   {% endif %}
-   {% endif %}
-   {% note %}
+Step 2: Install Docker
+Ensure that Docker is installed on your local machine. You can download Docker from the official website.
 
-   **Note:** You must push your image using `IMAGE_NAME:VERSION` and not using `IMAGE_NAME:SHA`.
+Step 3: Build a Docker Image
+Create a Dockerfile:
+Create a file named Dockerfile (no file extension) in your project directory. This file contains instructions on how to build your Docker image.
 
-   {% endnote %}
+Example Dockerfile for a simple Node.js application:
 
-### Example publishing a Docker image
+FROM node:14
 
-{% ifversion ghes %}
-These examples assume your instance has subdomain isolation enabled.
-{% endif %}
+WORKDIR /app
 
-You can publish version 1.0 of the `monalisa` image to the `octocat/octo-app` repository using an image ID.
+COPY package*.json ./
 
-{% ifversion fpt or ghec %}
+RUN npm install
 
-```shell
-$ docker images
 
-> REPOSITORY           TAG      IMAGE ID      CREATED      SIZE
-> monalisa             1.0      c75bebcdd211  4 weeks ago  1.11MB
+EXPOSE 3000
 
-# Tag the image with OWNER/REPO/IMAGE_NAME
-$ docker tag c75bebcdd211 docker.pkg.github.com/octocat/octo-app/monalisa:1.0
+CMD ["npm", "start"]
+This Dockerfile is for a Node.js application. Adjust it based on the requirements of your application.
 
-# Push the image to {% data variables.product.prodname_registry %}
-$ docker push docker.pkg.github.com/octocat/octo-app/monalisa:1.0
-```
+Build the Docker Image:
+Open a terminal, navigate to your project directory, and run the following command to build the Docker image:
 
-{% else %}
+docker build -t your-username/your-image-name:tag .
+Replace your-username, your-image-name, and tag with your Docker Hub username, desired image name, and a version tag, respectively.
 
-```shell
-$ docker images
+Step 4: Tag and Push the Docker Image to Docker Hub
+Tag the Docker Image:
+After building the image, tag it with your Docker Hub username and the desired image name:
 
-> REPOSITORY           TAG      IMAGE ID      CREATED      SIZE
-> monalisa             1.0      c75bebcdd211  4 weeks ago  1.11MB
+docker tag your-username/your-image-name:tag your-username/your-image-name:latest
+Log in to Docker Hub:
+Log in to your Docker Hub account using the following command:
 
-# Tag the image with OWNER/REPO/IMAGE_NAME
-$ docker tag c75bebcdd211 docker.HOSTNAME/octocat/octo-app/monalisa:1.0
+docker login
+Enter your Docker Hub username and password when prompted.
 
-# Push the image to {% data variables.product.prodname_registry %}
-$ docker push docker.HOSTNAME/octocat/octo-app/monalisa:1.0
-```
+Push the Docker Image:
+Push the tagged Docker image to Docker Hub:
 
-{% endif %}
+docker push your-username/your-image-name:latest
+This command uploads your image to Docker Hub.
 
-You can publish a new Docker image for the first time and name it `monalisa`.
+Step 5: Pull and Run the Docker Image
+Pull the Docker Image:
+On another machine or environment where Docker is installed, pull the Docker image from Docker Hub:
 
-{% ifversion fpt or ghec %}
 
-```shell
-# Build the image with docker.pkg.github.com/OWNER/REPOSITORY/IMAGE_NAME:VERSION
-# Assumes Dockerfile resides in the current working directory (.)
-$ docker build -t docker.pkg.github.com/octocat/octo-app/monalisa:1.0 .
+docker pull your-username/your-image-name:latest
+Run the Docker Container:
+Run a container using the pulled image:
 
-# Push the image to {% data variables.product.prodname_registry %}
-$ docker push docker.pkg.github.com/octocat/octo-app/monalisa:1.0
-```
+docker run -p 8080:3000 -d your-username/your-image-name:latest
+This example maps port 8080 on your local machine to port 3000 inside the Docker container.
 
-{% else %}
+Step 6: Check Docker Hub
+Visit your Docker Hub repository, and you should see your pushed Docker image. This image is now publicly accessible, and others can use it by pulling it from Docker Hub.
 
-```shell
-# Build the image with docker.HOSTNAME/OWNER/REPOSITORY/IMAGE_NAME:VERSION
-# Assumes Dockerfile resides in the current working directory (.)
-$ docker build -t docker.HOSTNAME/octocat/octo-app/monalisa:1.0 .
+Additional Tips:
+Docker Tags:
+Use meaningful tags for your Docker images to differentiate between versions or configurations.
 
-# Push the image to {% data variables.product.prodname_registry %}
-$ docker push docker.HOSTNAME/octocat/octo-app/monalisa:1.0
-```
+Private Repositories:
+Docker Hub allows you to create private repositories for your images if you want to limit access.
 
-{% endif %}
+Automated Builds:
+Docker Hub supports automated builds linked to a GitHub repository. Whenever you push changes to your GitHub repository, Docker Hub can automatically build and publish the new Docker image.
 
-## Downloading an image
+This is a basic overview, and there are many advanced features and configurations available on Docker Hub. Be sure to check the official Docker Hub documentation for more details and options.
 
-{% data reusables.package_registry.docker_registry_deprecation_status %}
-
-You can use the `docker pull` command to install a docker image from {% data variables.product.prodname_registry %}, replacing OWNER with the name of the personal account or organization that owns the repository, REPOSITORY with the name of the repository containing your project, IMAGE_NAME with name of the package or image,{% ifversion ghes or ghae %} HOSTNAME with the host name of {% data variables.location.product_location %}, {% endif %} and TAG_NAME with tag for the image you want to install.
-
-{% ifversion fpt or ghec %}
-
-```shell
-docker pull docker.pkg.github.com/OWNER/REPOSITORY/IMAGE_NAME:TAG_NAME
-```
-
-{% else %}
-<!--Versioning out this "subdomain isolation enabled" line because it's the only option for GHES 2.22 so it can be misleading.-->
-{% ifversion ghes %}
-If your instance has subdomain isolation enabled:
-{% endif %}
-
-```shell
-docker pull docker.HOSTNAME/OWNER/REPOSITORY/IMAGE_NAME:TAG_NAME
-```
-
-{% ifversion ghes %}
-If your instance has subdomain isolation disabled:
-
-```shell
-docker pull HOSTNAME/OWNER/REPOSITORY/IMAGE_NAME:TAG_NAME
-```
-
-{% endif %}
-{% endif %}
-
-{% note %}
-
-**Note:** You must pull the image using `IMAGE_NAME:VERSION` and not using `IMAGE_NAME:SHA`.
-
-{% endnote %}
-
-## Further reading
-
-- "[AUTOTITLE](/packages/learn-github-packages/deleting-and-restoring-a-package)"
-
-{% endif %}  <!-- End of main versioning block -->
+Ask me anything.
